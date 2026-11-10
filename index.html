@@ -240,6 +240,14 @@ h3 { font-size: 1.25rem; margin-bottom: 8px; }
 }
 .tryit-summary[hidden] { display: none; }
 .tryit-summary-title { font-weight: 600; color: #7aa2ff; }
+.contact-form .tryit-optout {
+  display: flex; align-items: center; gap: 8px; margin-top: 6px;
+  font-size: .85rem; font-weight: 500; color: #aab4c8; cursor: pointer;
+}
+.tryit-optout input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; padding: 0; }
+.tryit-summary.excluded { opacity: .65; border-style: solid; border-color: #2a3a5c; background: transparent; }
+.tryit-summary.excluded #tryit-summary-text { text-decoration: line-through; }
+.tryit-summary.excluded .tryit-summary-title { color: #aab4c8; }
 
 /* Footer */
 .footer { background: var(--dark); color: #7d879b; border-top: 1px solid #1c2740; padding: 26px 0; text-align: center; font-size: .9rem; }
@@ -722,8 +730,12 @@ h3 { font-size: 1.25rem; margin-bottom: 8px; }
           <input type="hidden" name="Try It: Brand color" id="tryit-color" disabled>
           <input type="hidden" name="Try It: Style" id="tryit-style" disabled>
           <div class="tryit-summary" id="tryit-summary" hidden>
-            <span class="tryit-summary-title">&#10003; Your "Try It" design will be included</span>
+            <span class="tryit-summary-title" id="tryit-summary-title">&#10003; Your "Try It" design will be included</span>
             <span id="tryit-summary-text"></span>
+            <label class="tryit-optout">
+              <input type="checkbox" id="tryit-optout">
+              Don't include my "Try It" design in this message
+            </label>
           </div>
           <button type="submit" class="btn btn-block">Send message</button>
           <p class="form-note" id="form-note"></p>
@@ -913,12 +925,24 @@ h3 { font-size: 1.25rem; margin-bottom: 8px; }
         const styleText = state.style === "dark" ? "Dark" : "Light";
         const nameText = nameInput.value.trim() || "(not entered)";
         const fields = { "tryit-type": typeText, "tryit-name": nameText, "tryit-color": colorText, "tryit-style": styleText };
-        Object.entries(fields).forEach(([id, val]) => { $(id).value = val; $(id).disabled = false; });
+        Object.entries(fields).forEach(([id, val]) => { $(id).value = val; });
+        applyOptOut();
         $("tryit-summary-text").textContent =
           typeText + " · " + colorBtn.getAttribute("aria-label") + " · " + styleText +
           (nameInput.value.trim() ? " · “" + nameInput.value.trim() + "”" : "");
         $("tryit-summary").hidden = false;
       }
+
+      // "Don't include my Try It design" checkbox: disabled fields are left out of the submission.
+      function applyOptOut() {
+        const excluded = $("tryit-optout").checked;
+        ["tryit-type", "tryit-name", "tryit-color", "tryit-style"].forEach(id => { $(id).disabled = excluded; });
+        $("tryit-summary").classList.toggle("excluded", excluded);
+        $("tryit-summary-title").textContent = excluded
+          ? "Your “Try It” design won’t be included"
+          : "✓ Your “Try It” design will be included";
+      }
+      $("tryit-optout").addEventListener("change", applyOptOut);
 
       $("type-chips").addEventListener("click", e => {
         const b = e.target.closest("button"); if (!b) return;
@@ -974,6 +998,7 @@ h3 { font-size: 1.25rem; margin-bottom: 8px; }
         });
         if (res.ok) {
           f.reset();
+          document.getElementById("tryit-optout").dispatchEvent(new Event("change"));
           note.textContent = "Thanks! Your message was sent. I'll get back to you within one business day.";
         } else {
           note.textContent = "Something went wrong. Please email me at " + MY_EMAIL + " or call (210) 857-2183.";
