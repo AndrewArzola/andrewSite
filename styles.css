@@ -134,6 +134,9 @@ h3 { font-size: 1.25rem; margin-bottom: 8px; }
   gap: 50px;
   align-items: center;
 }
+.project + .project { margin-top: 110px; }
+.project-flip { grid-template-columns: 1fr 1.1fr; }
+.project-flip .tilt-wrap { order: 2; }
 .project-preview {
   display: block;
   text-decoration: none;
@@ -234,6 +237,8 @@ h3 { font-size: 1.25rem; margin-bottom: 8px; }
 /* Responsive */
 @media (max-width: 860px) {
   .project, .contact-inner { grid-template-columns: 1fr; gap: 36px; }
+  .project-flip .tilt-wrap { order: 0; }
+  .project + .project { margin-top: 80px; }
   .steps { grid-template-columns: 1fr; }
   .two-col { grid-template-columns: 1fr; }
   .price-card { padding: 30px 22px; }
